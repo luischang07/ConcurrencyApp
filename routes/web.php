@@ -11,6 +11,8 @@ Route::get('/pedidos/create', [PedidosController::class, 'create'])->name('pedid
 Route::post('/pedidos', [PedidosController::class, 'store'])->name('pedidos.store');
 // API-ish endpoint for sucursales by cadena
 Route::get('/api/sucursales/{chainId}', [PedidosController::class, 'sucursalesByChain'])->name('api.sucursales.byChain');
+// API-ish endpoint for medicamentos with stock by sucursal
+Route::get('/api/medicamentos-stock/{sucursalId}', [PedidosController::class, 'medicamentosConStock'])->name('api.medicamentos.stock');
 
 // Medicamentos
 Route::get('/medicamentos', [MedicamentosController::class, 'index'])->name('medicamentos.index');

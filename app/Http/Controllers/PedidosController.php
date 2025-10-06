@@ -27,6 +27,12 @@ class PedidosController extends Controller
     return response()->json($sucursales);
   }
 
+  public function medicamentosConStock(int $sucursalId, MedicamentosService $medicamentosService)
+  {
+    $medicamentos = $medicamentosService->getMedicamentosConStockPorSucursal($sucursalId);
+    return response()->json($medicamentos);
+  }
+
   public function index(PedidosService $pedidosService)
   {
     $pedidos = $pedidosService->getPaginatedWithSucursal();

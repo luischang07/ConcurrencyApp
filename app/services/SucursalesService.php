@@ -17,8 +17,10 @@ class SucursalesService
   public function getAllSucursales()
   {
     return Sucursales::with('cadena')
-      ->select('id', 'nombre', 'cadenas_farmaceuticas_id')
-      ->orderBy('nombre')
+      ->select('sucursales.id', 'sucursales.nombre', 'sucursales.cadenas_farmaceuticas_id')
+      ->join('cadenas_farmaceuticas', 'sucursales.cadenas_farmaceuticas_id', '=', 'cadenas_farmaceuticas.id')
+      ->orderBy('cadenas_farmaceuticas.nombre')
+      ->orderBy('sucursales.nombre')
       ->get();
   }
 }

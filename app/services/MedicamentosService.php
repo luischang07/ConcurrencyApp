@@ -55,4 +55,16 @@ class MedicamentosService
       ->limit($limit)
       ->get();
   }
+
+  public function getMedicamentosConStockPorSucursal(int $sucursalId)
+  {
+    return Medicamentos::select('medicamentos.id', 'medicamentos.nombre_comercial', 'medicamentos.sustancia_activa', 'medicamentos.precio_unitario')
+      ->leftJoin('medicamentos_sucursales', function ($join) use ($sucursalId) {
+        $join->on('medicamentos.id', '=', 'medicamentos_sucursales.medicamentos_id')
+          ->where('medicamentos_sucursales.sucursales_id', '=', $sucursalId);
+      })
+      ->addSelect(DB::raw('COALESCE(medicamentos_sucursales.stock, 0) as stock'))
+      ->orderBy('medicamentos.nombre_comercial')
+      ->get();
+  }
 }

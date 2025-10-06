@@ -35,7 +35,6 @@ class EloquentPedidoRepository implements PedidoRepositoryInterface
         $pedido->setId($pedidoModel->id);
       }
 
-      // Guardar los detalles
       foreach ($pedido->getDetalles() as $detalle) {
         $this->saveDetalle($pedidoModel->id, $detalle);
       }
@@ -67,7 +66,6 @@ class EloquentPedidoRepository implements PedidoRepositoryInterface
       return false;
     }
 
-    // Decrementar stock
     if ($stockRecord) {
       $stockRecord->stock = $currentStock - $cantidad;
       $stockRecord->save();
@@ -99,14 +97,12 @@ class EloquentPedidoRepository implements PedidoRepositoryInterface
   private function saveDetalle(int $pedidoId, DetallePedido $detalle): void
   {
     if ($detalle->getId()) {
-      // Actualizar detalle existente
       DetallePedidos::where('id', $detalle->getId())->update([
         'medicamentos_id' => $detalle->getMedicamentoId(),
         'cantidad' => $detalle->getCantidad()->getValue(),
         'precio_unitario' => $detalle->getPrecioUnitario()->getValue(),
       ]);
     } else {
-      // Crear nuevo detalle
       $detalleModel = DetallePedidos::create([
         'pedidos_id' => $pedidoId,
         'medicamentos_id' => $detalle->getMedicamentoId(),
@@ -128,7 +124,6 @@ class EloquentPedidoRepository implements PedidoRepositoryInterface
       $pedidoModel->id
     );
 
-    // Agregar detalles
     foreach ($pedidoModel->detalles as $detalleModel) {
       $detalle = new DetallePedido(
         $detalleModel->medicamentos_id,

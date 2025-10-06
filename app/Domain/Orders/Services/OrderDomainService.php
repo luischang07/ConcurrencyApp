@@ -18,9 +18,6 @@ class OrderDomainService
     $this->pedidoRepository = $pedidoRepository;
   }
 
-  /**
-   * Crea un nuevo pedido con validaciones de negocio
-   */
   public function crearPedido(int $sucursalId, array $items): Pedido
   {
     if (empty($items)) {
@@ -39,9 +36,6 @@ class OrderDomainService
     return $this->pedidoRepository->save($pedido);
   }
 
-  /**
-   * Valida y agrega un detalle al pedido
-   */
   private function validarYAgregarDetalle(Pedido $pedido, array $item): void
   {
     if (!isset($item['id']) || !isset($item['cantidad'])) {
@@ -51,22 +45,18 @@ class OrderDomainService
     $medicamentoId = (int) $item['id'];
     $cantidadValue = (int) $item['cantidad'];
 
-    // Validar que el medicamento existe
     if (!$this->pedidoRepository->medicamentoExiste($medicamentoId)) {
       throw new InvalidArgumentException('El medicamento ID ' . $medicamentoId . ' no existe');
     }
 
-    // Obtener precio actual del medicamento
     $precio = $this->pedidoRepository->getPrecioMedicamento($medicamentoId);
     if ($precio === null) {
       throw new InvalidArgumentException('No se pudo obtener el precio del medicamento ID ' . $medicamentoId);
     }
 
-    // Crear value objects
     $cantidad = new Cantidad($cantidadValue);
     $precioUnitario = new PrecioUnitario($precio);
 
-    // Validar stock disponible
     $stockDisponible = $this->pedidoRepository->getStockDisponible($medicamentoId, $pedido->getSucursalId());
     if ($stockDisponible < $cantidad->getValue()) {
       throw new InvalidArgumentException(
@@ -75,7 +65,6 @@ class OrderDomainService
       );
     }
 
-    // Reservar stock
     $stockReservado = $this->pedidoRepository->reservarStock(
       $medicamentoId,
       $pedido->getSucursalId(),
@@ -88,7 +77,6 @@ class OrderDomainService
       );
     }
 
-    // Crear y agregar detalle
     $detalle = new DetallePedido($medicamentoId, $cantidad, $precioUnitario);
     $pedido->addDetalle($detalle);
   }

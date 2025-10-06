@@ -1,0 +1,84 @@
+/**
+ * Estilos específicos para el formulario de pedidos
+ */
+
+/* Autocompletado de medicamentos */
+.medicamentos-autocomplete {
+    @apply absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto;
+}
+
+.medicamentos-autocomplete-item {
+    @apply px-4 py-2 hover:bg-blue-50 dark:hover:bg-gray-600 cursor-pointer text-gray-700 dark:text-gray-200 transition-colors;
+}
+
+/* Estados de error para inputs */
+.input-error {
+    @apply border-red-500 dark:border-red-400 focus:ring-red-500 focus:border-red-500;
+}
+
+.input-normal {
+    @apply border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500;
+}
+
+/* Tabla de medicamentos agregados */
+.medicamentos-table {
+    @apply w-full bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden;
+}
+
+.medicamentos-table-header {
+    @apply bg-gray-100 dark:bg-gray-800;
+}
+
+.medicamentos-table-row {
+    @apply bg-white dark:bg-gray-700 divide-y divide-gray-200 dark:divide-gray-600;
+}
+
+/* Botones del formulario */
+.btn-primary {
+    @apply px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors dark:bg-blue-500 dark:hover:bg-blue-600;
+}
+
+.btn-success {
+    @apply px-6 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors dark:bg-green-500 dark:hover:bg-green-600;
+}
+
+.btn-secondary {
+    @apply px-6 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700;
+}
+
+.btn-danger {
+    @apply text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium text-sm transition-colors;
+}
+
+/* Alertas */
+.alert {
+    @apply px-4 py-3 rounded mb-6 flex;
+}
+
+.alert-error {
+    @apply bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-400;
+}
+
+.alert-success {
+    @apply bg-green-100 dark:bg-green-900/20 border border-green-400 dark:border-green-600 text-green-700 dark:text-green-400;
+}
+
+.alert-icon {
+    @apply fill-current h-6 w-6 mr-4 py-1;
+}
+
+/* Transiciones suaves */
+.fade-in {
+    animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

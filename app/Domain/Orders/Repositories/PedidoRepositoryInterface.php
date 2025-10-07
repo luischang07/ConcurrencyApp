@@ -3,13 +3,14 @@
 namespace App\Domain\Orders\Repositories;
 
 use App\Domain\Orders\Entities\Pedido;
+use App\Domain\Orders\Services\Inventario;
 
 interface PedidoRepositoryInterface
 {
   /**
    * Guarda un pedido completo con sus detalles y maneja la actualización de stock
    */
-  public function save(Pedido $pedido): Pedido;
+  public function save(Pedido $pedido, Inventario $inventario): Pedido;
 
   /**
    * Encuentra un pedido por su ID, incluye los detalles
@@ -36,4 +37,24 @@ interface PedidoRepositoryInterface
    * Obtiene el precio unitario actual de un medicamento
    */
   public function getPrecioMedicamento(int $medicamentoId): ?float;
+
+  public function cargarInventario(array $medicamentoId, int $sucursalId):Inventario;
+
+  public function aplicarInventario(Inventario $inventario): void;
+
+  /**
+   * Inicia una transacción (DB transaction)
+   */
+  public function empezarTransaccion(): void;
+
+  /**
+   * Commit de la transacción
+   */
+  public function commit(): void;
+
+  /**
+   * Rollback de la transacción
+   */
+  public function rollBack(): void;
 }
+

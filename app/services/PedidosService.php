@@ -45,8 +45,12 @@ class PedidosService
         $items
       );
 
+      if (!$pedidoDominio) {
+        throw new InvalidArgumentException('No se pudo crear el pedido');
+      }
+
       // Retornar el modelo Eloquent para mantener compatibilidad
-      return Pedidos::find($pedidoDominio->getId());
+      return Pedidos::with('detalles.medicamento', 'sucursal')->find($pedidoDominio->getId());
     } catch (InvalidArgumentException $e) {
       throw ValidationException::withMessages([
         'medicamentos' => $e->getMessage(),

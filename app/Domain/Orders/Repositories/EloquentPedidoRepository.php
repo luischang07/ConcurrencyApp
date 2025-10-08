@@ -18,21 +18,15 @@ class EloquentPedidoRepository implements PedidoRepositoryInterface
 {
   private static ?EloquentPedidoRepository $instance = null;
   //singleton
-  public function __construct()
-  {
-    
-  }
+  public function __construct() {}
   public function __wakeup()
   {
     throw new \Exception();
   }
-  public function __clone()
-  {
 
-  }
   public function getInstance(): EloquentPedidoRepository
   {
-    if(self::$instance === null){
+    if (self::$instance === null) {
       self::$instance = new EloquentPedidoRepository();
     }
     return self::$instance;
@@ -43,44 +37,42 @@ class EloquentPedidoRepository implements PedidoRepositoryInterface
     DB::beginTransaction();
   }
 
-  public function rollBack(): void{
+  public function rollBack(): void
+  {
     DB::rollBack();
   }
 
-  public function commit():void{
+  public function commit(): void
+  {
     DB::commit();
   }
 
   public function save(Pedido $pedido, Inventario $inventario): Pedido
   {
-    //RETORNAR EL PEDIDO SOLAMENTE SIN LA TRANSACCION
-      $pedidoModel = null;
-      if ($pedido->getId()) {
-        $pedidoModel = Pedidos::find($pedido->getId());
-        $pedidoModel->update([
-          'sucursales_id' => $pedido->getSucursalId(),
-          'fecha_hora' => $pedido->getFechaHora()->format('Y-m-d H:i:s'),
-          'estado' => $pedido->getEstado(),
-        ]);
-      } else {
-        $pedidoModel = Pedidos::create([
-          'sucursales_id' => $pedido->getSucursalId(),
-          'fecha_hora' => $pedido->getFechaHora()->format('Y-m-d H:i:s'),
-          'estado' => $pedido->getEstado(),
-        ]);
-        $pedido->setId($pedidoModel->id);
-      }
-
-      foreach ($pedido->getDetalles() as $detalle) {
-        $this->saveDetalle($pedidoModel->id, $detalle);
-      }
-      $this->aplicarInventario($inventario);
-
-      return $pedido;
+    $pedidoModel = null;
+    if ($pedido->getId()) {
+      $pedidoModel = Pedidos::find($pedido->getId());
+      $pedidoModel->update([
+        'sucursales_id' => $pedido->getSucursalId(),
+        'fecha_hora' => $pedido->getFechaHora()->format('Y-m-d H:i:s'),
+        'estado' => $pedido->getEstado(),
+      ]);
+    } else {
+      $pedidoModel = Pedidos::create([
+        'sucursales_id' => $pedido->getSucursalId(),
+        'fecha_hora' => $pedido->getFechaHora()->format('Y-m-d H:i:s'),
+        'estado' => $pedido->getEstado(),
+      ]);
+      $pedido->setId($pedidoModel->id);
     }
-  
 
-  
+    foreach ($pedido->getDetalles() as $detalle) {
+      $this->saveDetalle($pedidoModel->id, $detalle);
+    }
+    $this->aplicarInventario($inventario);
+
+    return $pedido;
+  }
 
   public function findById(int $id): ?Pedido
   {
@@ -179,18 +171,18 @@ class EloquentPedidoRepository implements PedidoRepositoryInterface
   public function cargarInventario(array $medicamentosId, int $sucursalId): Inventario
   {
     $stockActual = MedicamentosSucursales::lockForUpdate()
-    ->where('sucursales_id', $sucursalId)
-    ->whereIn('medicamentos_id', $medicamentosId)
-    ->get();
+      ->where('sucursales_id', $sucursalId)
+      ->whereIn('medicamentos_id', $medicamentosId)
+      ->get();
     return new Inventario($sucursalId, $stockActual->all());
   }
-  
+
   public function aplicarInventario(Inventario $inventario): void
   {
-    foreach($inventario->getCambios() as $cambio){
+    foreach ($inventario->getCambios() as $cambio) {
       MedicamentosSucursales::where('medicamentos_id', $cambio['medicamentoId'])
-      ->where('sucursales_id', $inventario->getSucursalId())
-      ->decrement('stock', $cambio['cantidad']);
+        ->where('sucursales_id', $inventario->getSucursalId())
+        ->decrement('stock', $cambio['cantidad']);
     }
   }
 }

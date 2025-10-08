@@ -58,7 +58,6 @@ class PedidosController extends Controller
     }
 
     try {
-      //CREAR OBJETO DEL DOMINIO Y PASARLO A LA CAPA
       $pedidosService->create($data, $items);
       return redirect()->route('pedidos.index')->with('success', 'Pedido creado correctamente');
     } catch (\Illuminate\Validation\ValidationException $e) {

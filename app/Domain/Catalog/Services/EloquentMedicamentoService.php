@@ -20,7 +20,7 @@ class EloquentMedicamentoService implements MedicamentoServiceInterface
   public function findById(int $medicamentoId): ?array
   {
     $medicamento = Medicamentos::find($medicamentoId);
-    
+
     if (!$medicamento) {
       return null;
     }

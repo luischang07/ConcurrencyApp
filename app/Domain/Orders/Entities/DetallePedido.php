@@ -3,25 +3,24 @@
 namespace App\Domain\Orders\Entities;
 
 use App\Domain\Orders\ValueObjects\Cantidad;
-use App\Domain\Orders\ValueObjects\PrecioUnitario;
 
 class DetallePedido
 {
   private ?int $id;
   private int $medicamentoId;
   private Cantidad $cantidad;
-  private PrecioUnitario $precioUnitario;
+  private float $precioUnitario;
 
   public function __construct(
     int $medicamentoId,
     Cantidad $cantidad,
-    PrecioUnitario $precioUnitario,
+    float $precioUnitario,
     ?int $id = null
   ) {
     $this->id = $id;
     $this->medicamentoId = $medicamentoId;
     $this->cantidad = $cantidad;
-    $this->precioUnitario = $precioUnitario;
+    $this->precioUnitario = round($precioUnitario, 2);
   }
 
   public function getId(): ?int
@@ -44,14 +43,21 @@ class DetallePedido
     return $this->cantidad;
   }
 
-  public function getPrecioUnitario(): PrecioUnitario
+  public function getPrecioUnitario(): float
   {
     return $this->precioUnitario;
   }
 
   public function getSubtotal(): float
   {
-    return $this->precioUnitario->multiply($this->cantidad);
+    return $this->precioUnitario * $this->cantidad->getValue();
+  }
+
+  public function equals(DetallePedido $other): bool
+  {
+    return $this->medicamentoId === $other->medicamentoId &&
+      $this->cantidad->equals($other->cantidad) &&
+      abs($this->precioUnitario - $other->precioUnitario) < 0.01;
   }
 
   public function toArray(): array
@@ -60,7 +66,7 @@ class DetallePedido
       'id' => $this->id,
       'medicamento_id' => $this->medicamentoId,
       'cantidad' => $this->cantidad->getValue(),
-      'precio_unitario' => $this->precioUnitario->getValue(),
+      'precio_unitario' => $this->precioUnitario,
       'subtotal' => $this->getSubtotal(),
     ];
   }

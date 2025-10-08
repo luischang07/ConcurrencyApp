@@ -5,17 +5,21 @@ namespace App\Domain\Orders\Services;
 use App\Domain\Orders\Entities\Pedido;
 use App\Domain\Orders\Entities\DetallePedido;
 use App\Domain\Orders\ValueObjects\Cantidad;
-use App\Domain\Orders\ValueObjects\PrecioUnitario;
 use App\Domain\Orders\Repositories\PedidoRepositoryInterface;
+use App\Domain\Inventory\Services\InventarioService;
 use InvalidArgumentException;
 
 class OrderDomainService
 {
   private PedidoRepositoryInterface $pedidoRepository;
+  private InventarioService $inventarioService;
 
-  public function __construct(PedidoRepositoryInterface $pedidoRepository)
-  {
+  public function __construct(
+    PedidoRepositoryInterface $pedidoRepository,
+    InventarioService $inventarioService
+  ) {
     $this->pedidoRepository = $pedidoRepository;
+    $this->inventarioService = $inventarioService;
   }
 
   public function crearPedido(int $sucursalId, array $items): Pedido
@@ -55,29 +59,11 @@ class OrderDomainService
     }
 
     $cantidad = new Cantidad($cantidadValue);
-    $precioUnitario = new PrecioUnitario($precio);
 
-    $stockDisponible = $this->pedidoRepository->getStockDisponible($medicamentoId, $pedido->getSucursalId());
-    if ($stockDisponible < $cantidad->getValue()) {
-      throw new InvalidArgumentException(
-        "Stock insuficiente para medicamento ID {$medicamentoId}. " .
-          "Stock disponible: {$stockDisponible}, solicitado: {$cantidad->getValue()}"
-      );
-    }
+    // Usar InventarioService para verificar y reservar stock
+    $this->inventarioService->reservarStock($medicamentoId, $pedido->getSucursalId(), $cantidad);
 
-    $stockReservado = $this->pedidoRepository->reservarStock(
-      $medicamentoId,
-      $pedido->getSucursalId(),
-      $cantidad->getValue()
-    );
-
-    if (!$stockReservado) {
-      throw new InvalidArgumentException(
-        "No se pudo reservar el stock para medicamento ID {$medicamentoId}"
-      );
-    }
-
-    $detalle = new DetallePedido($medicamentoId, $cantidad, $precioUnitario);
+    $detalle = new DetallePedido($medicamentoId, $cantidad, $precio);
     $pedido->addDetalle($detalle);
   }
 }

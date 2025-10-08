@@ -7,7 +7,7 @@ use App\Domain\Orders\Entities\Pedido;
 interface PedidoRepositoryInterface
 {
   /**
-   * Guarda un pedido completo con sus detalles y maneja la actualización de stock
+   * Guarda un pedido completo con sus detalles
    */
   public function save(Pedido $pedido): Pedido;
 
@@ -15,17 +15,6 @@ interface PedidoRepositoryInterface
    * Encuentra un pedido por su ID, incluye los detalles
    */
   public function findById(int $id): ?Pedido;
-
-  /**
-   * Verifica y reserva stock para un medicamento en una sucursal
-   * Retorna true si tiene stock suficiente y lo reserva, false en caso contrario
-   */
-  public function reservarStock(int $medicamentoId, int $sucursalId, int $cantidad): bool;
-
-  /**
-   * Obtiene el stock disponible de un medicamento en una sucursal
-   */
-  public function getStockDisponible(int $medicamentoId, int $sucursalId): int;
 
   /**
    * Verifica si un medicamento existe

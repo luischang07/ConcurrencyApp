@@ -7,7 +7,6 @@ use App\Domain\Orders\Entities\DetallePedido;
 use App\Domain\Orders\ValueObjects\Cantidad;
 use App\Models\Pedidos;
 use App\Models\DetallePedidos;
-use App\Models\Medicamentos;
 use Illuminate\Support\Facades\DB;
 use DateTime;
 
@@ -49,17 +48,6 @@ class EloquentPedidoRepository implements PedidoRepositoryInterface
     }
 
     return $this->mapToDomain($pedidoModel);
-  }
-
-  public function medicamentoExiste(int $medicamentoId): bool
-  {
-    return Medicamentos::where('id', $medicamentoId)->exists();
-  }
-
-  public function getPrecioMedicamento(int $medicamentoId): ?float
-  {
-    $medicamento = Medicamentos::find($medicamentoId);
-    return $medicamento ? $medicamento->precio_unitario : null;
   }
 
   private function saveDetalle(int $pedidoId, DetallePedido $detalle): void

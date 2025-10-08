@@ -15,14 +15,4 @@ interface PedidoRepositoryInterface
    * Encuentra un pedido por su ID, incluye los detalles
    */
   public function findById(int $id): ?Pedido;
-
-  /**
-   * Verifica si un medicamento existe
-   */
-  public function medicamentoExiste(int $medicamentoId): bool;
-
-  /**
-   * Obtiene el precio unitario actual de un medicamento
-   */
-  public function getPrecioMedicamento(int $medicamentoId): ?float;
 }

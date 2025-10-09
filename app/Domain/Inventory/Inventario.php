@@ -4,7 +4,7 @@ namespace App\Domain\Inventory;
 
 use InvalidArgumentException;
 
-class ReservaInventario
+class Inventario
 {
   private int $sucursalId;
   private array $medicamentos;

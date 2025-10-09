@@ -7,7 +7,7 @@ use App\Domain\Orders\Entities\DetallePedido;
 use App\Domain\Orders\ValueObjects\Cantidad;
 use App\Domain\Orders\Repositories\PedidoRepositoryInterface;
 use App\Domain\Inventory\InventarioService;
-use App\Domain\Inventory\ReservaInventario;
+use App\Domain\Inventory\Inventario;
 use App\Domain\Catalog\Services\MedicamentoServiceInterface;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -73,8 +73,8 @@ class OrderDomainService
         $detallesPedido[] = $detalleDatos;
       }
 
-      $reservaInventario = new ReservaInventario($sucursalId, $medicamentosParaReserva);
-      $this->inventarioService->reservarStock($reservaInventario);
+      $inventario = new Inventario($sucursalId, $medicamentosParaReserva);
+      $this->inventarioService->procesarInventario($inventario);
 
       $pedido = new Pedido($sucursalId);
 

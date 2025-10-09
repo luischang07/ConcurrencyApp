@@ -14,30 +14,28 @@ class EloquentPedidoRepository implements PedidoRepositoryInterface
 {
   public function save(Pedido $pedido): Pedido
   {
-    return DB::transaction(function () use ($pedido) {
-      $pedidoModel = null;
-      if ($pedido->getId()) {
-        $pedidoModel = Pedidos::find($pedido->getId());
-        $pedidoModel->update([
-          'sucursales_id' => $pedido->getSucursalId(),
-          'fecha_hora' => $pedido->getFechaHora()->format('Y-m-d H:i:s'),
-          'estado' => $pedido->getEstado(),
-        ]);
-      } else {
-        $pedidoModel = Pedidos::create([
-          'sucursales_id' => $pedido->getSucursalId(),
-          'fecha_hora' => $pedido->getFechaHora()->format('Y-m-d H:i:s'),
-          'estado' => $pedido->getEstado(),
-        ]);
-        $pedido->setId($pedidoModel->id);
-      }
+    $pedidoModel = null;
+    if ($pedido->getId()) {
+      $pedidoModel = Pedidos::find($pedido->getId());
+      $pedidoModel->update([
+        'sucursales_id' => $pedido->getSucursalId(),
+        'fecha_hora' => $pedido->getFechaHora()->format('Y-m-d H:i:s'),
+        'estado' => $pedido->getEstado(),
+      ]);
+    } else {
+      $pedidoModel = Pedidos::create([
+        'sucursales_id' => $pedido->getSucursalId(),
+        'fecha_hora' => $pedido->getFechaHora()->format('Y-m-d H:i:s'),
+        'estado' => $pedido->getEstado(),
+      ]);
+      $pedido->setId($pedidoModel->id);
+    }
 
-      foreach ($pedido->getDetalles() as $detalle) {
-        $this->saveDetalle($pedidoModel->id, $detalle);
-      }
+    foreach ($pedido->getDetalles() as $detalle) {
+      $this->saveDetalle($pedidoModel->id, $detalle);
+    }
 
-      return $pedido;
-    });
+    return $pedido;
   }
 
   public function findById(int $id): ?Pedido

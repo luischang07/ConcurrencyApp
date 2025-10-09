@@ -2,7 +2,7 @@
 
 namespace App\Domain\Inventory;
 
-use App\Domain\Inventory\ReservaInventario;
+use App\Domain\Inventory\Inventario;
 use App\Models\MedicamentosSucursales;
 use InvalidArgumentException;
 use Illuminate\Support\Facades\DB;
@@ -12,13 +12,13 @@ class InventarioService
   /**
    * Reserva stock para una reserva de inventario completa
    */
-  public function reservarStock(ReservaInventario $reserva): void
+  public function procesarInventario(Inventario $inventario): void
   {
     if (DB::transactionLevel() > 0) {
-      $this->ejecutarReserva($reserva);
+      $this->aplicarInventario($inventario);
     } else {
-      DB::transaction(function () use ($reserva) {
-        $this->ejecutarReserva($reserva);
+      DB::transaction(function () use ($inventario) {
+        $this->aplicarInventario($inventario);
       });
     }
   }
@@ -26,7 +26,7 @@ class InventarioService
   /**
    * Verifica si hay suficiente stock para todos los medicamentos de la reserva
    */
-  public function verificarDisponibilidad(ReservaInventario $reserva): bool
+  public function verificarDisponibilidad(Inventario $reserva): bool
   {
     $sucursalId = $reserva->getSucursalId();
 
@@ -56,7 +56,7 @@ class InventarioService
   /**
    * Obtiene información de stock para todos los medicamentos de la reserva
    */
-  public function getInformacionStock(ReservaInventario $reserva): array
+  public function getInformacionStock(Inventario $reserva): array
   {
     $sucursalId = $reserva->getSucursalId();
     $informacion = [];
@@ -77,15 +77,11 @@ class InventarioService
     return $informacion;
   }
 
-  /**
-   * Ejecuta la reserva de stock - asume que ya está en transacción y con locks
-   */
-  private function ejecutarReserva(ReservaInventario $reserva): void
+  private function aplicarInventario(Inventario $inventario): void
   {
-    $sucursalId = $reserva->getSucursalId();
+    $sucursalId = $inventario->getSucursalId();
 
-    // Solo decrementar el stock - las validaciones y locks ya se hicieron
-    foreach ($reserva->getMedicamentos() as $medicamento) {
+    foreach ($inventario->getMedicamentos() as $medicamento) {
       $medicamentoId = $medicamento['medicamentoId'];
       $cantidadSolicitada = $medicamento['cantidad'];
 

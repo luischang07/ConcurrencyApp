@@ -22,7 +22,7 @@ class Sucursales extends Model
    */
   public function stocks()
   {
-    return $this->hasMany(MedicamentosSucursales::class, 'sucursales_id');
+    return $this->hasMany(MedicamentosSucursales::class, 'sucursal_id');
   }
 
   /**

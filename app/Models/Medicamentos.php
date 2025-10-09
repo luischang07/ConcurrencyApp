@@ -17,7 +17,7 @@ class Medicamentos extends Model
    */
   public function stocks()
   {
-    return $this->hasMany(MedicamentosSucursales::class, 'medicamentos_id');
+    return $this->hasMany(MedicamentosSucursales::class, 'medicamento_id');
   }
 
   /**

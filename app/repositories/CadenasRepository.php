@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Services;
+namespace App\Repositories;
 
 use App\Models\CadenasFarmaceuticas;
+use Illuminate\Support\Collection;
 
-class CadenasService
+class CadenasRepository
 {
-  public function all()
+  public function getAll(): Collection
   {
     return CadenasFarmaceuticas::select('id', 'nombre')->orderBy('nombre')->get();
   }

@@ -1,25 +1,25 @@
 <?php
 
-namespace App\Domain\Catalog\Services;
+namespace App\Domain\Catalog\Repositories;
 
 use Illuminate\Support\Collection;
 
-interface MedicamentoServiceInterface
+interface MedicamentoRepositoryInterface
 {
   /**
-   * Verifica si un medicamento existe
+   * Find medicamento by ID
    */
-  public function existe(int $medicamentoId): bool;
+  public function findById(int $medicamentoId): ?object;
 
   /**
-   * Obtiene el precio unitario de un medicamento
+   * Check if medicamento exists
    */
-  public function getPrecio(int $medicamentoId): ?float;
+  public function exists(int $medicamentoId): bool;
 
   /**
-   * Obtiene información básica de un medicamento
+   * Get precio unitario for a medicamento
    */
-  public function findById(int $medicamentoId): ?array;
+  public function getPrecioUnitario(int $medicamentoId): ?float;
 
   /**
    * Bloquea y obtiene los stocks disponibles para una lista de medicamentos en una sucursal

@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Services;
+namespace App\Repositories;
 
 use App\Models\Sucursales;
+use Illuminate\Support\Collection;
 
-class SucursalesService
+class SucursalesRepository
 {
-  public function forChain(int $chainId)
+  public function getByChain(int $chainId): Collection
   {
     return Sucursales::where('cadenas_farmaceuticas_id', $chainId)
       ->select('id', 'nombre', 'cadenas_farmaceuticas_id')
@@ -14,7 +15,7 @@ class SucursalesService
       ->get();
   }
 
-  public function getAllSucursales()
+  public function getAllWithChain(): Collection
   {
     return Sucursales::with('cadena')
       ->select('sucursales.id', 'sucursales.nombre', 'sucursales.cadenas_farmaceuticas_id')

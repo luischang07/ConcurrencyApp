@@ -24,14 +24,18 @@ class MedicamentosSucursalesSeeder extends Seeder
       foreach ($sucursales as $sucursal) {
         // Generate random stock between 0 and 200 for each medication per branch
         $stock = rand(0, 200);
+        $stockMinimo = rand(5, 20);
+        $stockMaximo = rand(100, 500);
 
         DB::table('medicamentos_sucursales')->updateOrInsert([
-          'medicamentos_id' => $medicamento->id,
-          'sucursales_id' => $sucursal->id,
+          'sucursal_id' => $sucursal->id,
+          'medicamento_id' => $medicamento->id,
         ], [
-          'medicamentos_id' => $medicamento->id,
-          'sucursales_id' => $sucursal->id,
+          'medicamento_id' => $medicamento->id,
+          'sucursal_id' => $sucursal->id,
           'stock' => $stock,
+          'stockMinimo' => $stockMinimo,
+          'stockMaximo' => $stockMaximo,
           'created_at' => now(),
           'updated_at' => now(),
         ]);

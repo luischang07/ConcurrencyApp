@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Services;
+namespace App\Repositories;
 
 use App\Models\Pedidos;
 use App\Domain\Orders\Services\OrderDomainService;
 use App\Domain\Orders\Repositories\PedidoRepositoryInterface;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 
-class PedidosService
+class PedidosRepository
 {
   private OrderDomainService $orderDomainService;
   private PedidoRepositoryInterface $pedidoRepository;
@@ -19,24 +20,21 @@ class PedidosService
     $this->pedidoRepository = $pedidoRepository;
   }
 
-  public function getPaginatedWithSucursal(int $perPage = 30)
+  public function getPaginatedWithSucursal(int $perPage = 30): LengthAwarePaginator
   {
     return Pedidos::with('sucursal')->orderBy('fecha_hora', 'desc')->paginate($perPage);
   }
 
-  public function getPaginatedEnviados(int $perPage = 30)
+  public function getPaginatedEnviados(int $perPage = 30): LengthAwarePaginator
   {
     return Pedidos::enviados()->with('sucursal')->orderBy('fecha_hora', 'desc')->paginate($perPage);
   }
 
-  public function getPaginatedPendientes(int $perPage = 30)
+  public function getPaginatedPendientes(int $perPage = 30): LengthAwarePaginator
   {
     return Pedidos::pendientes()->with('sucursal')->orderBy('fecha_hora', 'desc')->paginate($perPage);
   }
 
-  /**
-   * Crea un nuevo pedido usando objetos de dominio
-   */
   public function create(array $data, array $items): Pedidos
   {
     try {
@@ -45,7 +43,6 @@ class PedidosService
         $items
       );
 
-      // Retornar el modelo Eloquent para mantener compatibilidad
       return Pedidos::find($pedidoDominio->getId());
     } catch (InvalidArgumentException $e) {
       throw ValidationException::withMessages([
@@ -54,10 +51,7 @@ class PedidosService
     }
   }
 
-  /**
-   * Obtiene un pedido por ID usando el repositorio de dominio
-   */
-  public function findById(int $id)
+  public function findById(int $id): ?Pedidos
   {
     $pedidoDominio = $this->pedidoRepository->findById($id);
 
@@ -65,7 +59,6 @@ class PedidosService
       return null;
     }
 
-    // Retornar el modelo Eloquent para mantener compatibilidad con las vistas
     return Pedidos::with('detalles.medicamento', 'sucursal')->find($id);
   }
 }

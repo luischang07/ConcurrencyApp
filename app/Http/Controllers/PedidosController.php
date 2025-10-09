@@ -3,17 +3,17 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Services\CadenasService;
-use App\Services\SucursalesService;
-use App\Services\MedicamentosService;
-use App\Services\PedidosService;
+use App\Repositories\CadenasRepository;
+use App\Repositories\SucursalesRepository;
+use App\Repositories\MedicamentosRepository;
+use App\Repositories\PedidosRepository;
 
 class PedidosController extends Controller
 {
-  public function create(CadenasService $cadenasService, MedicamentosService $medService)
+  public function create(CadenasRepository $cadenasRepository, MedicamentosRepository $medicamentosRepository)
   {
-    $cadenas = $cadenasService->all();
-    $medicamentos = $medService->all();
+    $cadenas = $cadenasRepository->getAll();
+    $medicamentos = $medicamentosRepository->getAll();
 
     return view('pedidos.create', [
       'cadenasJson' => $cadenas->toJson(),
@@ -21,25 +21,25 @@ class PedidosController extends Controller
     ]);
   }
 
-  public function sucursalesByChain(int $chainId, SucursalesService $sucService)
+  public function sucursalesByChain(int $chainId, SucursalesRepository $sucursalesRepository)
   {
-    $sucursales = $sucService->forChain($chainId);
+    $sucursales = $sucursalesRepository->getByChain($chainId);
     return response()->json($sucursales);
   }
 
-  public function medicamentosConStock(int $sucursalId, MedicamentosService $medicamentosService)
+  public function medicamentosConStock(int $sucursalId, MedicamentosRepository $medicamentosRepository)
   {
-    $medicamentos = $medicamentosService->getMedicamentosConStockPorSucursal($sucursalId);
+    $medicamentos = $medicamentosRepository->getMedicamentosConStockPorSucursal($sucursalId);
     return response()->json($medicamentos);
   }
 
-  public function index(PedidosService $pedidosService)
+  public function index(PedidosRepository $pedidosRepository)
   {
-    $pedidos = $pedidosService->getPaginatedWithSucursal();
+    $pedidos = $pedidosRepository->getPaginatedWithSucursal();
     return view('pedidos.index', ['pedidos' => $pedidos]);
   }
 
-  public function store(Request $request, PedidosService $pedidosService)
+  public function store(Request $request, PedidosRepository $pedidosRepository)
   {
     $data = $request->validate([
       'cadena' => 'required|integer|exists:cadenas_farmaceuticas,id',
@@ -58,7 +58,7 @@ class PedidosController extends Controller
     }
 
     try {
-      $pedidosService->create($data, $items);
+      $pedidosRepository->create($data, $items);
       return redirect()->route('pedidos.index')->with('success', 'Pedido creado correctamente');
     } catch (\Illuminate\Validation\ValidationException $e) {
       return back()->withErrors($e->errors())->withInput();

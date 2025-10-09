@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\MedicamentosService;
-use App\Services\SucursalesService;
+use App\Repositories\MedicamentosRepository;
+use App\Repositories\SucursalesRepository;
 use Illuminate\Http\Request;
 
 class MedicamentosController extends Controller
 {
-  public function index(Request $request, MedicamentosService $medicamentosService, SucursalesService $sucursalesService)
+  public function index(Request $request, MedicamentosRepository $medicamentosRepository, SucursalesRepository $sucursalesRepository)
   {
     $sucursalId = $request->get('sucursal');
 
-    $sucursales = $sucursalesService->getAllSucursales();
+    $sucursales = $sucursalesRepository->getAllWithChain();
 
-    $medicamentos = $medicamentosService->paginatedWithStock($sucursalId, 20);
+    $medicamentos = $medicamentosRepository->getPaginatedWithStock($sucursalId, 20);
 
     return view('medicamentos.index', [
       'medicamentos' => $medicamentos,

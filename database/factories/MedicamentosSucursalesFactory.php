@@ -19,9 +19,11 @@ class MedicamentosSucursalesFactory extends Factory
   public function definition(): array
   {
     return [
-      'medicamentos_id' => Medicamentos::factory(),
-      'sucursales_id' => Sucursales::factory(),
+      'sucursal_id' => Sucursales::factory(),
+      'medicamento_id' => Medicamentos::factory(),
       'stock' => $this->faker->numberBetween(0, 500),
+      'stockMinimo' => $this->faker->numberBetween(5, 20),
+      'stockMaximo' => $this->faker->numberBetween(100, 1000),
     ];
   }
 }

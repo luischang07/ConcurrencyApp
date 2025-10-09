@@ -6,8 +6,10 @@ use App\Domain\Orders\Entities\Pedido;
 use App\Domain\Orders\Entities\DetallePedido;
 use App\Domain\Orders\ValueObjects\Cantidad;
 use App\Domain\Orders\Repositories\PedidoRepositoryInterface;
-use App\Domain\Inventory\Services\InventarioService;
+use App\Domain\Inventory\InventarioService;
+use App\Domain\Inventory\ReservaInventario;
 use App\Domain\Catalog\Services\MedicamentoServiceInterface;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 class OrderDomainService
@@ -32,19 +34,64 @@ class OrderDomainService
       throw new InvalidArgumentException('El pedido debe tener al menos un item');
     }
 
-    $pedido = new Pedido($sucursalId);
+    return DB::transaction(function () use ($sucursalId, $items) {
+      $medicamentosParaReserva = [];
+      $detallesPedido = [];
 
-    // Ordenar por ID para evitar deadlocks
-    usort($items, fn($a, $b) => $a['id'] <=> $b['id']);
+      // Ordenar por ID
+      usort($items, fn($a, $b) => $a['id'] <=> $b['id']);
 
-    foreach ($items as $item) {
-      $this->validarYAgregarDetalle($pedido, $item);
-    }
+      $medicamentosIds = array_map(fn($item) => (int) $item['id'], $items);
 
-    return $this->pedidoRepository->save($pedido);
+      $stocksDisponibles = $this->medicamentoService->bloquearStocksPorSucursal($medicamentosIds, $sucursalId);
+
+      foreach ($items as $item) {
+        $detalleDatos = $this->validarItem($item);
+        $medicamentoId = $detalleDatos['medicamentoId'];
+        $cantidadSolicitada = $detalleDatos['cantidad']->getValue();
+
+        if (!$stocksDisponibles->has($medicamentoId)) {
+          throw new InvalidArgumentException(
+            "No existe inventario para medicamento ID {$medicamentoId} en sucursal ID {$sucursalId}"
+          );
+        }
+
+        $stockDisponible = $stocksDisponibles->get($medicamentoId)->stock;
+        if ($stockDisponible < $cantidadSolicitada) {
+          throw new InvalidArgumentException(
+            "Stock insuficiente para medicamento ID {$medicamentoId}. " .
+              "Stock disponible: {$stockDisponible}, " .
+              "Solicitado: {$cantidadSolicitada}"
+          );
+        }
+
+        $medicamentosParaReserva[] = [
+          'medicamentoId' => $medicamentoId,
+          'cantidad' => $cantidadSolicitada
+        ];
+
+        $detallesPedido[] = $detalleDatos;
+      }
+
+      $reservaInventario = new ReservaInventario($sucursalId, $medicamentosParaReserva);
+      $this->inventarioService->reservarStock($reservaInventario);
+
+      $pedido = new Pedido($sucursalId);
+
+      foreach ($detallesPedido as $detalleDatos) {
+        $detalle = new DetallePedido(
+          $detalleDatos['medicamentoId'],
+          $detalleDatos['cantidad'],
+          $detalleDatos['precio']
+        );
+        $pedido->addDetalle($detalle);
+      }
+
+      return $this->pedidoRepository->save($pedido);
+    });
   }
 
-  private function validarYAgregarDetalle(Pedido $pedido, array $item): void
+  private function validarItem(array $item): array
   {
     if (!isset($item['id']) || !isset($item['cantidad'])) {
       throw new InvalidArgumentException('Faltan datos del medicamento (id o cantidad)');
@@ -53,7 +100,6 @@ class OrderDomainService
     $medicamentoId = (int) $item['id'];
     $cantidadValue = (int) $item['cantidad'];
 
-    // Usar MedicamentoService en lugar de PedidoRepository
     if (!$this->medicamentoService->existe($medicamentoId)) {
       throw new InvalidArgumentException('El medicamento ID ' . $medicamentoId . ' no existe');
     }
@@ -65,10 +111,10 @@ class OrderDomainService
 
     $cantidad = new Cantidad($cantidadValue);
 
-    // Usar InventarioService para verificar y reservar stock
-    $this->inventarioService->reservarStock($medicamentoId, $pedido->getSucursalId(), $cantidad);
-
-    $detalle = new DetallePedido($medicamentoId, $cantidad, $precio);
-    $pedido->addDetalle($detalle);
+    return [
+      'medicamentoId' => $medicamentoId,
+      'cantidad' => $cantidad,
+      'precio' => $precio
+    ];
   }
 }

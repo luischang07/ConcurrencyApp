@@ -12,16 +12,20 @@ return new class extends Migration
   public function up(): void
   {
     Schema::create('medicamentos_sucursales', function (Blueprint $table) {
-      $table->id();
-      $table->foreignId('medicamentos_id')->constrained('medicamentos', 'id');
-      $table->foreignId('sucursales_id')->constrained('sucursales', 'id');
+      $table->foreignId('sucursal_id')->constrained('sucursales', 'id');
+      $table->foreignId('medicamento_id')->constrained('medicamentos', 'id');
       $table->unsignedInteger('stock')->default(0);
       $table->unsignedInteger('stockMinimo')->default(0);
       $table->unsignedInteger('stockMaximo')->default(1000);
       $table->timestamps();
 
-      // Ensure unique combination of medicamento and sucursal
-      $table->unique(['medicamentos_id', 'sucursales_id']);
+      // Definir llave primaria compuesta
+      $table->primary(['sucursal_id', 'medicamento_id']);
+
+      // Índices para mejorar performance en consultas
+      $table->index('sucursal_id');
+      $table->index('medicamento_id');
+      $table->index('stock');
     });
   }
 
